@@ -1,0 +1,24 @@
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Local outputs that should not be committed by default
+logs/
+tmp/
+artifacts/
+scratch/
+
+# Large regenerated datasets and ad hoc model outputs
+gravity_dataset_*.pt
+Models_*/
+comparison_results_*/
+
+# OS/editor files
+Thumbs.db
+Desktop.ini
+.DS_Store

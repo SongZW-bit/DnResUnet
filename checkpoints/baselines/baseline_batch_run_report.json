@@ -1,0 +1,45 @@
+{
+  "dataset": "gravity_dataset_100k_V2_REALISTIC.pt",
+  "output_dir": "Models_Benchmark_v2",
+  "device": "cuda",
+  "models": [
+    {
+      "model": "basiccnn",
+      "experiment_name": "BasicCNN_v2_realistic",
+      "status": "completed",
+      "elapsed_seconds": 1100.01,
+      "checkpoint": "Models_Benchmark_v2/BasicCNN_v2_realistic_checkpoint.pt",
+      "history_csv": "Models_Benchmark_v2/BasicCNN_v2_realistic_history.csv",
+      "summary_json": "Models_Benchmark_v2/BasicCNN_v2_realistic_summary.json"
+    },
+    {
+      "model": "dncnn",
+      "experiment_name": "DnCNN_v2_realistic",
+      "status": "completed",
+      "elapsed_seconds": 1954.33,
+      "checkpoint": "Models_Benchmark_v2/DnCNN_v2_realistic_checkpoint.pt",
+      "history_csv": "Models_Benchmark_v2/DnCNN_v2_realistic_history.csv",
+      "summary_json": "Models_Benchmark_v2/DnCNN_v2_realistic_summary.json"
+    },
+    {
+      "model": "unet1d",
+      "experiment_name": "UNet1D_v2_realistic",
+      "status": "completed",
+      "elapsed_seconds": 2514.33,
+      "checkpoint": "Models_Benchmark_v2/UNet1D_v2_realistic_checkpoint.pt",
+      "history_csv": "Models_Benchmark_v2/UNet1D_v2_realistic_history.csv",
+      "summary_json": "Models_Benchmark_v2/UNet1D_v2_realistic_summary.json"
+    },
+    {
+      "model": "tcn",
+      "experiment_name": "TCN_v2_realistic",
+      "status": "completed",
+      "elapsed_seconds": 1922.86,
+      "checkpoint": "Models_Benchmark_v2/TCN_v2_realistic_checkpoint.pt",
+      "history_csv": "Models_Benchmark_v2/TCN_v2_realistic_history.csv",
+      "summary_json": "Models_Benchmark_v2/TCN_v2_realistic_summary.json"
+    }
+  ],
+  "started_at": "2026-03-12 09:05:51",
+  "finished_at": "2026-03-12 11:10:43"
+}

@@ -1,0 +1,34 @@
+{
+  "output_file": "D:\\SongZW\\\u8bba\u6587\\An Intelligent Denoising Method for Borehole Gravity Data Based on Deep Residual Networks\\DnResUnet-Gravity\\gravity_dataset_v2_smoketest.pt",
+  "total_samples": 25,
+  "samples_per_level": 5,
+  "noise_levels_mgal": [
+    0.01,
+    0.025,
+    0.05,
+    0.1,
+    0.2
+  ],
+  "target_length": 512,
+  "challenging_fraction": 0.0,
+  "sampling_intervals_m": [
+    0.5,
+    1.0,
+    2.0,
+    5.0
+  ],
+  "scenario_counts": {
+    "dipping": 5,
+    "faulted": 2,
+    "gradient": 3,
+    "hybrid": 6,
+    "layered": 3,
+    "near_far_combo": 4,
+    "thin_beds": 2
+  },
+  "normalization_note": "All samples are resampled to 512 points for network training after variable-spacing forward modeling.",
+  "total_generation_attempts": 25,
+  "num_workers": 2,
+  "shard_size": 3,
+  "num_shards": 10
+}

@@ -1,0 +1,12 @@
+{
+  "experiment_name": "UNet1D_v2_realistic",
+  "architecture": "unet1d",
+  "kernel_size": 5,
+  "use_residual_blocks": true,
+  "predict_noise": false,
+  "tv_weight": 0.0,
+  "test_loss": 0.0012608664981564092,
+  "test_mse": 0.0012608664981564092,
+  "test_psnr": 29.100507658641607,
+  "test_gfc": 0.9829879498026174
+}

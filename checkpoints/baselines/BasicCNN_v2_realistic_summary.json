@@ -1,0 +1,12 @@
+{
+  "experiment_name": "BasicCNN_v2_realistic",
+  "architecture": "basiccnn",
+  "kernel_size": 3,
+  "use_residual_blocks": true,
+  "predict_noise": false,
+  "tv_weight": 0.0,
+  "test_loss": 0.004149558535735508,
+  "test_mse": 0.004149558535735508,
+  "test_psnr": 23.891607020005647,
+  "test_gfc": 0.9568952899070302
+}

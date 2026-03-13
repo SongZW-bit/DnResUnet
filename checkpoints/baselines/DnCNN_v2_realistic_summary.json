@@ -1,0 +1,12 @@
+{
+  "experiment_name": "DnCNN_v2_realistic",
+  "architecture": "dncnn",
+  "kernel_size": 3,
+  "use_residual_blocks": true,
+  "predict_noise": true,
+  "tv_weight": 0.0,
+  "test_loss": 0.002193609405320826,
+  "test_mse": 0.002193609405320826,
+  "test_psnr": 26.671434476633653,
+  "test_gfc": 0.9723289684884867
+}

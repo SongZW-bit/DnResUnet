@@ -1,0 +1,22 @@
+name: dnresunet-cageo
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pytorch=2.5.1
+  - torchvision=0.20.1
+  - numpy=2.3.3
+  - scipy=1.16.2
+  - pandas=2.3.3
+  - matplotlib=3.10.7
+  - pip
+  - pip:
+      - simpeg==0.24.0
+      - discretize==0.12.0
+      - choclo==0.3.2
+      - geoana==0.8.0
+      - pymatsolver==0.4.0
+      - scikit-image==0.25.2
+      - PyWavelets==1.9.0
+      - tqdm==4.67.1

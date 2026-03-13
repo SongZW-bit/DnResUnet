@@ -1,0 +1,8 @@
+{
+  "samples_per_noise": 200,
+  "confidence": 0.95,
+  "summary_csv": "D:\\SongZW\\\u8bba\u6587\\An Intelligent Denoising Method for Borehole Gravity Data Based on Deep Residual Networks\\DnResUnet-Gravity\\comparison_results_independent_v3\\independent_resampling_summary.csv",
+  "raw_csv": "D:\\SongZW\\\u8bba\u6587\\An Intelligent Denoising Method for Borehole Gravity Data Based on Deep Residual Networks\\DnResUnet-Gravity\\comparison_results_independent_v3\\independent_resampling_raw_metrics.csv",
+  "field_review_template": "D:\\SongZW\\\u8bba\u6587\\An Intelligent Denoising Method for Borehole Gravity Data Based on Deep Residual Networks\\DnResUnet-Gravity\\comparison_results_independent_v3\\field_review_template.csv",
+  "paper_fig_dir": "D:\\SongZW\\\u8bba\u6587\\An Intelligent Denoising Method for Borehole Gravity Data Based on Deep Residual Networks\\Q2\\CAGEO_LaTeXTemplate-main\\My_Paper_Submission\\figs"
+}

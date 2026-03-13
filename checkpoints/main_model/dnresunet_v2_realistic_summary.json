@@ -1,0 +1,12 @@
+{
+  "experiment_name": "dnresunet_v2_realistic",
+  "architecture": "improved",
+  "kernel_size": 7,
+  "use_residual_blocks": true,
+  "predict_noise": true,
+  "tv_weight": 0.001,
+  "test_loss": 0.001088206597884144,
+  "test_mse": 0.0010881579357234963,
+  "test_psnr": 29.76909582661416,
+  "test_gfc": 0.9836102629163462
+}
