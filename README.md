@@ -1,6 +1,6 @@
 # DnResUnet
 
-Code package for the manuscript **"An Intelligent Denoising Method for Borehole Gravity Data Based on Deep Residual Networks"**, prepared for submission to *Computers & Geosciences*.
+Code package for the manuscript **"An Intelligent Denoising Method for Borehole Gravity Data Based on Deep Residual Networks"**, prepared for submission to *Journal of Applied Geophysics*.
 
 This release is organized as a public-facing reproducibility package rather than a working lab directory. It contains the final scripts used by the current manuscript, trained checkpoints for the reported deep-learning models, independent-evaluation outputs, an executable baseline suite, environment specifications, and licensing information.
 
