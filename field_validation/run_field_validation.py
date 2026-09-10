@@ -217,11 +217,12 @@ def evaluate(
     device,
     repeats: int,
     seed: int,
-) -> tuple[list[dict], list[dict], dict[str, dict]]:
+) -> tuple[list[dict], list[dict], dict[str, dict], dict[str, dict]]:
     rng = np.random.default_rng(seed)
     metric_rows: list[dict] = []
     prediction_rows: list[dict] = []
     representative: dict[str, dict] = {}
+    density_profiles: dict[str, dict] = {}
 
     by_well: dict[str, list[dict]] = defaultdict(list)
     for row in facts:
@@ -239,6 +240,12 @@ def evaluate(
         grid_m = np.linspace(depths_m.min(), depths_m.max(), 512)
         grid_ft = grid_m / 0.3048
         reference_grid = np.interp(grid_ft, depths_ft, corrected)
+        density_depths_m, reference_density = interval_density(depths_ft, corrected)
+        density_profiles[well] = {
+            "depth_m": density_depths_m,
+            "Pre-drift input": [],
+            "DnResUnet output": [],
+        }
 
         for repeat_index in range(repeats):
             selected = [group[int(rng.integers(0, len(group)))] for group in (by_depth[depth] for depth in depths_ft)]
@@ -263,12 +270,15 @@ def evaluate(
             )
             methods["DnResUnet"] = predict_dnresunet(model, device, normalized) * scale + trend_grid
 
-            _, reference_density = interval_density(depths_ft, corrected)
             for method, estimate_grid in methods.items():
                 estimate_at_stations = np.interp(depths_m, grid_m, estimate_grid)
                 _, estimate_density = interval_density(depths_ft, estimate_at_stations)
                 error = estimate_at_stations - corrected
                 density_error = estimate_density - reference_density
+                if method == "Uncorrected input":
+                    density_profiles[well]["Pre-drift input"].append(density_error)
+                elif method == "DnResUnet":
+                    density_profiles[well]["DnResUnet output"].append(density_error)
                 metric_rows.append(
                     {
                         "well": well,
@@ -301,7 +311,7 @@ def evaluate(
                             **{f"{name}_mgal": float(values[index]) for name, values in methods.items()},
                         }
                     )
-    return metric_rows, prediction_rows, representative
+    return metric_rows, prediction_rows, representative, density_profiles
 
 
 def aggregate_metrics(metric_rows: list[dict]) -> list[dict]:
@@ -333,7 +343,30 @@ def aggregate_metrics(metric_rows: list[dict]) -> list[dict]:
     return aggregated
 
 
-def plot_validation(representative: dict[str, dict], metric_rows: list[dict], output_dir: Path) -> None:
+def aggregate_density_profiles(density_profiles: dict[str, dict]) -> list[dict]:
+    rows: list[dict] = []
+    for well, record in density_profiles.items():
+        depths = np.asarray(record["depth_m"], dtype=float)
+        for method in ("Pre-drift input", "DnResUnet output"):
+            values = np.stack(record[method])
+            for index, depth in enumerate(depths):
+                residuals = values[:, index]
+                rows.append(
+                    {
+                        "well": well,
+                        "method": method,
+                        "depth_m": float(depth),
+                        "residual_mean_g_cm3": float(np.mean(residuals)),
+                        "residual_median_g_cm3": float(np.median(residuals)),
+                        "residual_p10_g_cm3": float(np.percentile(residuals, 10)),
+                        "residual_p90_g_cm3": float(np.percentile(residuals, 90)),
+                        "n_repeat_resamples": int(values.shape[0]),
+                    }
+                )
+    return rows
+
+
+def plot_validation(density_rows: list[dict], output_dir: Path) -> None:
     mpl.rcParams.update(
         {
             "font.family": "sans-serif",
@@ -341,32 +374,45 @@ def plot_validation(representative: dict[str, dict], metric_rows: list[dict], ou
             "pdf.fonttype": 42,
             "svg.fonttype": "none",
             "font.size": 7.5,
-            "axes.spines.top": False,
-            "axes.spines.right": False,
+            "axes.spines.top": True,
+            "axes.spines.right": True,
             "axes.linewidth": 0.8,
             "legend.frameon": False,
         }
     )
-    wells = list(representative)
+    wells = [config["well"] for config in WELLS.values()]
+    short_names = {config["well"]: config["short"] for config in WELLS.values()}
     colors = {
-        "Uncorrected input": "#F8766D",
-        "DnResUnet": "#00A6A6",
+        "Pre-drift input": "#D77A61",
+        "DnResUnet output": "#168C8C",
     }
-    fig, axes = plt.subplots(1, 3, figsize=(7.2, 4.35))
-    fig.subplots_adjust(left=0.075, right=0.992, top=0.90, bottom=0.20, wspace=0.28)
+    interval_alpha = {
+        "Pre-drift input": 0.16,
+        "DnResUnet output": 0.20,
+    }
+    limit = max(
+        abs(float(row[key]))
+        for row in density_rows
+        for key in ("residual_p10_g_cm3", "residual_p90_g_cm3")
+    )
+    limit *= 1.06
+    fig, axes = plt.subplots(1, 3, figsize=(7.2, 4.2))
+    fig.subplots_adjust(left=0.075, right=0.992, top=0.90, bottom=0.19, wspace=0.24)
     for column, well in enumerate(wells):
         ax = axes[column]
-        record = representative[well]
-        reference = record["reference_grid"]
         for spine in ax.spines.values():
             spine.set_visible(True)
             spine.set_linewidth(0.8)
             spine.set_color("#202020")
         ax.tick_params(top=False, right=False)
-        ax.grid(True, color="#D8D8D8", linestyle=(0, (2.5, 2.5)), lw=0.5, alpha=0.72)
+        ax.grid(axis="x", color="#D8D8D8", linestyle=(0, (2.5, 2.5)), lw=0.5, alpha=0.72)
         ax.set_axisbelow(True)
+        well_rows = [row for row in density_rows if row["well"] == well]
+        depths = np.asarray(
+            [row["depth_m"] for row in well_rows if row["method"] == "Pre-drift input"], dtype=float
+        )
         for boundary in LITHOLOGY_BOUNDARIES_M.get(well, []):
-            if record["grid_m"].min() <= boundary <= record["grid_m"].max():
+            if depths.min() <= boundary <= depths.max():
                 ax.axhline(
                     boundary,
                     color="#A9824A",
@@ -375,33 +421,36 @@ def plot_validation(representative: dict[str, dict], metric_rows: list[dict], ou
                     alpha=0.48,
                     zorder=1,
                 )
-        ax.plot(
-            1000.0 * (record["methods"]["Uncorrected input"] - reference),
-            record["grid_m"],
-            color=colors["Uncorrected input"],
-            lw=0.95,
-            alpha=0.82,
-            label="Pre-drift input",
-            zorder=3,
-        )
         ax.axvline(
             0.0,
             color="black",
             lw=0.95,
             linestyle="--",
-            label="Published corrected reference",
+            label="Residual = 0",
             zorder=2,
         )
-        ax.plot(
-            1000.0 * (record["methods"]["DnResUnet"] - reference),
-            record["grid_m"],
-            color=colors["DnResUnet"],
-            lw=1.35,
-            label="DnResUnet output",
-            zorder=4,
-        )
+        for method, linewidth, zorder in (
+            ("Pre-drift input", 1.0, 3),
+            ("DnResUnet output", 1.4, 4),
+        ):
+            method_rows = [row for row in well_rows if row["method"] == method]
+            depth = np.asarray([row["depth_m"] for row in method_rows], dtype=float)
+            median = np.asarray([row["residual_median_g_cm3"] for row in method_rows], dtype=float)
+            p10 = np.asarray([row["residual_p10_g_cm3"] for row in method_rows], dtype=float)
+            p90 = np.asarray([row["residual_p90_g_cm3"] for row in method_rows], dtype=float)
+            ax.fill_betweenx(
+                depth,
+                p10,
+                p90,
+                color=colors[method],
+                alpha=interval_alpha[method],
+                linewidth=0,
+                zorder=zorder,
+            )
+            ax.plot(median, depth, color=colors[method], lw=linewidth, label=method, zorder=zorder + 1)
         ax.invert_yaxis()
-        ax.set_title(well, pad=7, fontsize=8.5)
+        ax.set_xlim(-limit, limit)
+        ax.set_title(short_names[well], pad=7, fontsize=8.5)
         if column == 0:
             ax.set_ylabel("Depth (m)")
         ax.text(
@@ -414,17 +463,17 @@ def plot_validation(representative: dict[str, dict], metric_rows: list[dict], ou
             fontsize=8,
         )
 
-    fig.supxlabel(r"Difference from published corrected reference ($\mu$Gal)", y=0.105)
+    fig.supxlabel(r"Interval-density residual relative to published reference (g cm$^{-3}$)", y=0.10, fontsize=8.0)
     legend_handles = [
-        Line2D([0], [0], color=colors["Uncorrected input"], lw=0.95, alpha=0.82),
+        Line2D([0], [0], color=colors["Pre-drift input"], lw=1.0),
+        Line2D([0], [0], color=colors["DnResUnet output"], lw=1.4),
         Line2D([0], [0], color="black", lw=0.95, linestyle="--"),
-        Line2D([0], [0], color=colors["DnResUnet"], lw=1.35),
         Line2D([0], [0], color="#A9824A", lw=0.65, linestyle=(0, (3.0, 2.2)), alpha=0.65),
     ]
     legend_labels = [
-        "Pre-drift input",
-        "Published corrected reference",
-        "DnResUnet output",
+        "Pre-drift median (10th-90th percentile)",
+        "DnResUnet median (10th-90th percentile)",
+        "Residual = 0",
         "Reported lithologic boundary",
     ]
     fig.legend(
@@ -433,7 +482,7 @@ def plot_validation(representative: dict[str, dict], metric_rows: list[dict], ou
         loc="lower center",
         bbox_to_anchor=(0.5, 0.012),
         ncol=4,
-        fontsize=6.0,
+        fontsize=6.2,
         frameon=False,
         handlelength=2.6,
         columnspacing=1.25,
@@ -461,12 +510,16 @@ def main() -> None:
     facts = extract_principal_facts(args.pdf)
     write_csv(args.output_dir / "usgs_principal_facts_extracted.csv", facts)
     model, device = load_model(args.code_dir, args.checkpoint)
-    metric_rows, prediction_rows, representative = evaluate(facts, model, device, args.repeats, args.seed)
+    metric_rows, prediction_rows, representative, density_profiles = evaluate(
+        facts, model, device, args.repeats, args.seed
+    )
     aggregate_rows = aggregate_metrics(metric_rows)
+    density_rows = aggregate_density_profiles(density_profiles)
     write_csv(args.output_dir / "field_validation_raw_metrics.csv", metric_rows)
     write_csv(args.output_dir / "field_validation_summary.csv", aggregate_rows)
     write_csv(args.output_dir / "field_validation_representative_profiles.csv", prediction_rows)
-    plot_validation(representative, metric_rows, args.output_dir)
+    write_csv(args.output_dir / "field_validation_density_residual_summary.csv", density_rows)
+    plot_validation(density_rows, args.output_dir)
 
     report = {
         "source": "USGS Open-File Report 85-426",

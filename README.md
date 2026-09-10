@@ -45,7 +45,7 @@ For the manuscript, the repository URL is reported in the `Computer Code Availab
 - `results/independent_resampling_v3/`
   Exported statistics and grouped comparison figures corresponding to the latest independent benchmark.
 - `results/robustness_round2/` and `results/field_validation_round2/`
-  Compact machine-readable summaries and paper figures for the second-round robustness and public-field validation.
+  Compact machine-readable summaries, plotted interval-density residual data, and paper figures for the second-round robustness and public-field validation.
 - `component_noise_results/` and `efficiency_results/`
   Optional output locations for the additional diagnostic experiments introduced during revision.
 - `sample_data/`
@@ -177,7 +177,7 @@ python field_validation/run_field_validation.py \
   --output-dir results/field_validation_round2
 ```
 
-The script extracts the principal-facts tables, reconstructs profiles before the reported drift correction, repeat-resamples duplicate occupations, and compares the frozen model output with the published conventional processing. The latter is not treated as a noise-free target.
+The script extracts the principal-facts tables, reconstructs profiles before the reported drift correction, repeat-resamples duplicate occupations, and compares the frozen model output with the published conventional processing. It also exports the interval-density residual median and 10th-90th percentiles plotted in Figure 15. The published processing is not treated as a noise-free target.
 
 ### 9. Run the inference-efficiency benchmark
 
@@ -204,9 +204,8 @@ The script writes:
 - The main network reported in the manuscript is the GroupNorm-based DnResUnet configuration in `DnResUnet_code.py`.
 - The deep-learning baseline comparison uses BasicCNN, DnCNN, UNet1D, and TCN checkpoints contained in `checkpoints/baselines/`.
 - The grouped benchmark figures and summary tables used in the manuscript are derived from the independent resampling workflow.
-- The component-wise diagnostic table is produced by `component_noise_eval.py`.
 - The weak-anomaly and distribution-shift tables are produced by `robustness_eval.py`.
-- The field-derived table and figure are produced by `field_validation/run_field_validation.py` from USGS Open-File Report 85-426.
+- The field-derived table, interval-density residual figure, and plotted source data are produced by `field_validation/run_field_validation.py` from USGS Open-File Report 85-426.
 - The computational-efficiency table is produced by `efficiency_eval.py`.
 
 ## Contact

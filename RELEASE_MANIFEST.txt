@@ -56,6 +56,7 @@ results\robustness_round2\robustness_sample_metadata.csv
 results\robustness_round2\robustness_summary.csv
 results\robustness_round2\robustness_summary.pdf
 results\field_validation_round2\field_validation.pdf
+results\field_validation_round2\field_validation_density_residual_summary.csv
 results\field_validation_round2\field_validation_report.json
 results\field_validation_round2\field_validation_summary.csv
 results\field_validation_round2\usgs_principal_facts_extracted.csv
