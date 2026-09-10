@@ -205,7 +205,8 @@ def plot_summary(summary_rows: list[dict], raw_rows: list[dict], output_dir: Pat
         "TCN": "#8E6C8A",
         "DnResUnet": "#B22222",
     }
-    fig, axes = plt.subplots(1, 3, figsize=(7.2, 2.78), constrained_layout=True)
+    fig, axes = plt.subplots(1, 3, figsize=(7.2, 3.08))
+    fig.subplots_adjust(left=0.075, right=0.992, top=0.89, bottom=0.31, wspace=0.37)
     for condition_index, condition in enumerate(conditions):
         rows = {
             row["method"]: row
@@ -235,18 +236,24 @@ def plot_summary(summary_rows: list[dict], raw_rows: list[dict], output_dir: Pat
         rotation_mode="anchor",
     )
     axes[0].set_ylabel("Normalized MSE")
-    axes[0].set_title("Distribution-shift performance", pad=8)
+    axes[0].set_title("Distribution-shift performance", pad=7, fontsize=8.5)
     axes[0].grid(axis="y", which="major", color="#D9D9D9", lw=0.55, alpha=0.75)
     axes[0].set_axisbelow(True)
     condition_markers = ["o", "s", "^", "D"]
-    for condition, marker in zip(conditions, condition_markers):
-        axes[0].scatter([], [], marker=marker, s=18, color="#3A3A3A", label=condition)
-    axes[0].legend(
-        loc="upper right",
-        fontsize=6.0,
+    condition_handles = [
+        axes[0].scatter([], [], marker=marker, s=18, color="#3A3A3A")
+        for marker in condition_markers
+    ]
+    fig.legend(
+        condition_handles,
+        conditions,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 0.015),
+        ncol=4,
+        fontsize=6.4,
         handletextpad=0.35,
-        borderaxespad=0.25,
-        labelspacing=0.25,
+        borderaxespad=0.0,
+        columnspacing=1.2,
     )
 
     weak_rows = [
@@ -293,16 +300,16 @@ def plot_summary(summary_rows: list[dict], raw_rows: list[dict], output_dir: Pat
 
     interval_panel(axes[1], "low_frequency_nrmse")
     axes[1].set_ylabel("Low-frequency NRMSE\n(lower is better)")
-    axes[1].set_title("Weak long-wavelength subset", pad=8)
+    axes[1].set_title("Weak long-wavelength subset", pad=7, fontsize=8.5)
     axes[1].set_ylim(0.035, 7.5)
 
     interval_panel(axes[2], "peak_amplitude_ratio")
     axes[2].axhline(1.0, color="#222222", lw=0.9, linestyle="--", zorder=4)
     axes[2].set_ylabel("Recovered peak / clean peak\n(closer to 1 is better)")
-    axes[2].set_title("Weak-anomaly amplitude retention", pad=8)
+    axes[2].set_title("Weak-anomaly amplitude retention", pad=7, fontsize=8.5)
     axes[2].set_ylim(0.48, 23.0)
     for label, ax in zip("abc", axes):
-        ax.text(0.01, 0.98, label, transform=ax.transAxes, va="top", fontweight="bold")
+        ax.text(0.01, 0.98, label, transform=ax.transAxes, va="top", fontweight="bold", fontsize=8)
     prefix = output_dir / "robustness_summary"
     fig.savefig(prefix.with_suffix(".pdf"), bbox_inches="tight")
     fig.savefig(prefix.with_suffix(".svg"), bbox_inches="tight")
@@ -325,8 +332,8 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     sys.path.insert(0, str(args.code_dir))
 
-    from DnResUnet_code import IndependentGravityGenerator, predict_clean_signal  # noqa: PLC0415
-    from independent_resampling_eval import load_checkpoint_model  # noqa: PLC0415
+    from DnResUnet_code import IndependentGravityGenerator, predict_clean_signal
+    from independent_resampling_eval import load_checkpoint_model
 
     device = torch.device("cpu")
     checkpoint_names = {
