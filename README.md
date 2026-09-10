@@ -2,7 +2,7 @@
 
 Code package for the manuscript **"Deep Residual U-Net Denoising of Borehole Gravity Data Under Non-stationary Noise"**, prepared for submission to *Journal of Applied Geophysics*.
 
-This release is organized as a public-facing reproducibility package rather than a working lab directory. It contains the final scripts used by the current manuscript, trained checkpoints for the reported deep-learning models, independent-evaluation outputs, component-wise noise diagnostics, inference-efficiency benchmarking, an executable baseline suite, environment specifications, and licensing information.
+This release is organized as a public-facing reproducibility package rather than a working lab directory. It contains the final scripts used by the current manuscript, trained checkpoints for the reported deep-learning models, independent-evaluation outputs, component-wise noise diagnostics, weak-anomaly and distribution-shift tests, public field-derived validation, inference-efficiency benchmarking, an executable baseline suite, environment specifications, and licensing information.
 
 ## Scope of This Release
 
@@ -26,6 +26,10 @@ For the manuscript, the repository URL is reported in the `Computer Code Availab
   Independent resampling benchmark, grouped-figure export, and no-ground-truth field-review template export.
 - `component_noise_eval.py`
   Diagnostic experiment for isolated non-stationary noise components, including heteroscedastic noise, drift, colored noise, step offsets, spikes, and mild depth-axis misalignment.
+- `robustness_eval.py`
+  Independent weak long-wavelength and distribution-shift evaluation using unseen heavy-tailed/pink/chirp/burst noise and sparse, gapped acquisition.
+- `field_validation/run_field_validation.py`
+  Extraction and repeat-resampled validation workflow for USGS Open-File Report 85-426. The source report is public at `https://doi.org/10.3133/ofr85426`; its corrected profiles are used as conventional processing references, not noise-free labels.
 - `efficiency_eval.py`
   CPU/GPU inference-efficiency benchmark for DnResUnet, deep-learning baselines, and classical filters.
 - `data.py`
@@ -40,6 +44,8 @@ For the manuscript, the repository URL is reported in the `Computer Code Availab
   Final deep-learning baseline checkpoints and training summaries used by the manuscript.
 - `results/independent_resampling_v3/`
   Exported statistics and grouped comparison figures corresponding to the latest independent benchmark.
+- `results/robustness_round2/` and `results/field_validation_round2/`
+  Compact machine-readable summaries and paper figures for the second-round robustness and public-field validation.
 - `component_noise_results/` and `efficiency_results/`
   Optional output locations for the additional diagnostic experiments introduced during revision.
 - `sample_data/`
@@ -50,7 +56,7 @@ For the manuscript, the repository URL is reported in the `Computer Code Availab
 Included:
 
 - all source code required to generate data, train models, run baseline experiments, and reproduce the independent evaluation workflow;
-- scripts for the component-wise noise analysis and inference-efficiency comparison added in the revised manuscript;
+- scripts for the component-wise, weak-anomaly, distribution-shift, field-derived, and inference-efficiency analyses added during revision;
 - the trained DnResUnet model used in the paper;
 - the trained deep-learning baselines used in the final comparison;
 - the latest independent benchmark statistics and paper-ready grouped figures;
@@ -60,7 +66,7 @@ Not included:
 
 - the full `gravity_dataset_100k_V2_REALISTIC.pt` training corpus, because large binary datasets are better archived separately from the code repository.
 
-To reproduce the full benchmark from scratch, first generate the realistic dataset with `forward_v2.py`, then train the models, and finally run `independent_resampling_eval.py`. The component-wise and efficiency analyses can be run from the provided checkpoints.
+To reproduce the full benchmark from scratch, first generate the realistic dataset with `forward_v2.py`, then train the models, and finally run `independent_resampling_eval.py`. The component-wise, robustness, public-field, and efficiency analyses can be run from the provided checkpoints.
 
 ## Installation
 
@@ -146,7 +152,34 @@ The script writes:
 
 Use `--device cpu` if CUDA is unavailable.
 
-### 7. Run the inference-efficiency benchmark
+### 7. Run the weak-anomaly and distribution-shift tests
+
+```bash
+python robustness_eval.py \
+  --code-dir . \
+  --checkpoint-dir checkpoints \
+  --samples-per-noise 120 \
+  --output-dir results/robustness_round2
+```
+
+The default criteria define a weak long-wavelength response as a clean peak not exceeding 0.2 mGal with at least 95% of its spectral energy in the lowest 8% of non-negative spatial-frequency bins.
+
+### 8. Run the public USGS field-derived validation
+
+Download USGS Open-File Report 85-426 from `https://doi.org/10.3133/ofr85426`, then run:
+
+```bash
+python field_validation/run_field_validation.py \
+  --pdf USGS_OFR_85-426_borehole_gravity.pdf \
+  --code-dir . \
+  --checkpoint checkpoints/main_model/dnresunet_v2_realistic_checkpoint.pt \
+  --repeats 200 \
+  --output-dir results/field_validation_round2
+```
+
+The script extracts the principal-facts tables, reconstructs profiles before the reported drift correction, repeat-resamples duplicate occupations, and compares the frozen model output with the published conventional processing. The latter is not treated as a noise-free target.
+
+### 9. Run the inference-efficiency benchmark
 
 This experiment reports parameter counts, checkpoint sizes, single-profile latency, and batched latency.
 
@@ -172,20 +205,11 @@ The script writes:
 - The deep-learning baseline comparison uses BasicCNN, DnCNN, UNet1D, and TCN checkpoints contained in `checkpoints/baselines/`.
 - The grouped benchmark figures and summary tables used in the manuscript are derived from the independent resampling workflow.
 - The component-wise diagnostic table is produced by `component_noise_eval.py`.
+- The weak-anomaly and distribution-shift tables are produced by `robustness_eval.py`.
+- The field-derived table and figure are produced by `field_validation/run_field_validation.py` from USGS Open-File Report 85-426.
 - The computational-efficiency table is produced by `efficiency_eval.py`.
 
-## Journal of Applied Geophysics Release Notes
-
-Before making the public repository live, complete these final release steps:
-
-1. Push this folder to a permanent public repository such as GitHub or GitLab.
-2. Verify that the public repository contains `component_noise_eval.py`, `efficiency_eval.py`, the checkpoints, and the smoke-test data.
-3. Keep the repository URL synchronized with the manuscript: `https://github.com/SongZW-bit/DnResUnet`.
-4. If a versioned archive or dataset DOI is minted later, add it to the manuscript during proof or future release updates.
-
 ## Contact
-
-For correspondence related to the code package, please update this section with the final corresponding-author information before public release.
 
 - Contact email: `songzw24@mails.jlu.edu.cn`
 

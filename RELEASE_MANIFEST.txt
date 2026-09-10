@@ -5,6 +5,10 @@ DnResUnet_code.py
 environment.yml
 forward_v2.py
 independent_resampling_eval.py
+component_noise_eval.py
+efficiency_eval.py
+robustness_eval.py
+field_validation\run_field_validation.py
 inspect_v2_dataset.py
 LICENSE
 README.md
@@ -47,6 +51,14 @@ results\independent_resampling_v3\low_noise_comparison.pdf
 results\independent_resampling_v3\medium_noise_comparison.pdf
 results\independent_resampling_v3\spectrogram_comparison.pdf
 results\independent_resampling_v3\spectrum_comparison.pdf
+results\robustness_round2\robustness_report.json
+results\robustness_round2\robustness_sample_metadata.csv
+results\robustness_round2\robustness_summary.csv
+results\robustness_round2\robustness_summary.pdf
+results\field_validation_round2\field_validation.pdf
+results\field_validation_round2\field_validation_report.json
+results\field_validation_round2\field_validation_summary.csv
+results\field_validation_round2\usgs_principal_facts_extracted.csv
 sample_data\gravity_dataset_100k_V2_REALISTIC.json
 sample_data\gravity_dataset_v2_smoketest.json
 sample_data\gravity_dataset_v2_smoketest.pt
