@@ -206,7 +206,7 @@ def plot_summary(summary_rows: list[dict], raw_rows: list[dict], output_dir: Pat
         "DnResUnet": "#B22222",
     }
     fig, axes = plt.subplots(1, 3, figsize=(7.2, 3.08))
-    fig.subplots_adjust(left=0.075, right=0.992, top=0.89, bottom=0.31, wspace=0.37)
+    fig.subplots_adjust(left=0.075, right=0.992, top=0.89, bottom=0.25, wspace=0.37)
     for condition_index, condition in enumerate(conditions):
         rows = {
             row["method"]: row
@@ -237,6 +237,7 @@ def plot_summary(summary_rows: list[dict], raw_rows: list[dict], output_dir: Pat
     )
     axes[0].set_ylabel("Normalized MSE")
     axes[0].set_title("Distribution-shift performance", pad=7, fontsize=8.5)
+    axes[0].set_ylim(0.32, axes[0].get_ylim()[1])
     axes[0].grid(axis="y", which="major", color="#D9D9D9", lw=0.55, alpha=0.75)
     axes[0].set_axisbelow(True)
     condition_markers = ["o", "s", "^", "D"]
@@ -244,16 +245,17 @@ def plot_summary(summary_rows: list[dict], raw_rows: list[dict], output_dir: Pat
         axes[0].scatter([], [], marker=marker, s=18, color="#3A3A3A")
         for marker in condition_markers
     ]
-    fig.legend(
+    axes[0].legend(
         condition_handles,
         conditions,
-        loc="lower center",
-        bbox_to_anchor=(0.5, 0.015),
-        ncol=4,
-        fontsize=6.4,
-        handletextpad=0.35,
+        loc="lower right",
+        bbox_to_anchor=(0.99, 0.015),
+        ncol=2,
+        fontsize=5.4,
+        handletextpad=0.25,
         borderaxespad=0.0,
-        columnspacing=1.2,
+        columnspacing=0.65,
+        labelspacing=0.28,
     )
 
     weak_rows = [
